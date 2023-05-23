@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Data Generator</title>
+  <style>
+    /* CSS styling for the table cells */
+    table {
+      border-collapse: collapse;
+    }
+
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Data Generator</h1>
+  <form id="dataForm">
+    <label for="entropy">Entropy:</label>
+    <input type="number" id="entropy" name="entropy" required><br><br>
+    
+    <label for="nclass">Number of Classes:</label>
+    <input type="number" id="nclass" name="nclass" required><br><br>
+    
+    <!-- <label for="weights">Weights:</label>
+    <input type="number" id="weights" name="weights"><br><br> -->
+    
+    <label for="dim">Dimension:</label>
+    <input type="number" id="dim" name="dim"><br><br>
+    
+    <button type="button" onclick="sendData()">Send Data</button>
+  </form>
+  
+  <br><br>
+  
+  <table id="matrixTable">
+    <!-- Matrix will be inserted here -->
+  </table>
+  
+  <script>
+    function sendData() {
+      var entropy = document.getElementById("entropy").value;
+      var nclass = document.getElementById("nclass").value;
+    //   var weights = document.getElementById("weights").value;
+      var dim = document.getElementById("dim").value;
+  
+      var xhr = new XMLHttpRequest();
+      var url = "https://misterinho.com/data_generator"; // Replace with your Flask route
+  
+      var data = JSON.stringify({
+        "entropy": entropy,
+        "nclass": nclass,
+        // "weights": weights,
+        "dim": dim
+      });
+  
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+  
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          var response = JSON.parse(xhr.responseText);
+          displayMatrix(response.matrix);
+        }
+      };
+  
+      xhr.send(data);
+    }
+
+    function generateColorPalette(numColors) {
+    var colorPalette = [];
+    for (var i = 0; i < numColors; i++) {
+      // Generate a random color in hexadecimal format
+      var color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+      colorPalette.push(color);
+    }
+    return colorPalette;
+  }
+  
+  function displayMatrix(matrix) {
+    var table = document.getElementById("matrixTable");
+    table.innerHTML = "";
+
+    // Parse the JSON matrix string into a JavaScript array
+    var matrixArray = JSON.parse(matrix);
+    
+    var nclass = matrixArray.length;
+    var colorPalette = generateColorPalette(nclass);
+
+    for (var i = 0; i < matrixArray.length; i++) {
+      var row = table.insertRow();
+
+      for (var j = 0; j < matrixArray[i].length; j++) {
+        var cell = row.insertCell();
+        cell.innerHTML = matrixArray[i][j];
+
+        // Assign the corresponding color to the cell based on the number
+        var colorIndex = matrixArray[i][j] % nclass;
+        cell.style.backgroundColor = colorPalette[colorIndex];
+      }
+    }
+  }
+  </script>
+  
+</body>
+</html>
